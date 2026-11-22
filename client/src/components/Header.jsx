@@ -16,14 +16,12 @@ export default function Header() {
   const path = useLocation().pathname;
 
   return (
-    <Navbar className="border-b-2">
-      <NavbarBrand as={Link} to="/">
-        <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white text-2xl">
-          Blog
+    <Navbar className="border-b border-slate-700 bg-slate-950">
+      <NavbarBrand as={Link} to="/" className="flex items-center gap-1">
+        <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          BlogSpace
         </span>
-        <span className="self-center whitespace-nowrap text-2xl sm:text-xl font-semibold dark:text-white">
-          Application
-        </span>
+        <span className="text-purple-500 text-2xl font-bold">.</span>
       </NavbarBrand>
 
       <form>
@@ -34,25 +32,42 @@ export default function Header() {
           className="hidden lg:inline"
         />
       </form>
-
       <Button className="w-12 h-10 lg:hidden" color="gray" pill>
         <AiOutlineSearch />
       </Button>
-
       <div className="flex gap-2 md:order-2">
         <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
           <FaMoon />
         </Button>
-
+       
         <Link to="/sign-in">
-          <Button className="bg-gradient-to-r from-purple-600 to-blue-500 text-white">
+          <Button
+            color="light"
+            className="
+      !rounded-lg
+      !border-2
+      !border-violet-600
+      !bg-white
+      !text-violet-600
+      !font-semibold
+      !shadow-none
+      !transition-all
+      !duration-300
+
+      hover:!border-transparent
+      hover:!bg-gradient-to-r
+      hover:!from-violet-600
+      hover:!to-blue-600
+      hover:!text-white
+      hover:!shadow-lg
+    "
+          >
             Sign In
           </Button>
         </Link>
-
+       
         <NavbarToggle />
       </div>
-
       <NavbarCollapse>
         <NavbarLink as={Link} to="/" active={path === "/"}>
           Home
