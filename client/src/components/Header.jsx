@@ -39,7 +39,7 @@ export default function Header() {
         <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
           <FaMoon />
         </Button>
-       
+
         <Link to="/sign-in">
           <Button
             color="light"
@@ -65,7 +65,7 @@ export default function Header() {
             Sign In
           </Button>
         </Link>
-       
+
         <NavbarToggle />
       </div>
       <NavbarCollapse>
