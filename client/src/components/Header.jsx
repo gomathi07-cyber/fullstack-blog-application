@@ -1,84 +1,135 @@
+import { useState } from "react";
 import {
+  Avatar,
   Button,
+  Dropdown,
+  DropdownHeader,
+  DropdownItem,
+  DropdownDivider,
   Navbar,
-  NavbarBrand,
+  NavbarToggle,
   NavbarCollapse,
   NavbarLink,
-  NavbarToggle,
   TextInput,
 } from "flowbite-react";
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 export default function Header() {
   const path = useLocation().pathname;
+  const navigate = useNavigate();
+
+  const { currentUser } = useSelector((state) => state.user);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Handle search submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const trimmedSearch = searchTerm.trim();
+
+    if (trimmedSearch) {
+      navigate(`/search?searchTerm=${encodeURIComponent(trimmedSearch)}`);
+    }
+  };
 
   return (
-    <Navbar className="border-b border-slate-700 bg-slate-950">
-      <NavbarBrand as={Link} to="/" className="flex items-center gap-1">
-        <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+    <Navbar className="border-b-2">
+      {/* Logo */}
+      <Link
+        to="/"
+        className="self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white"
+      >
+        <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
           BlogSpace
         </span>
-        <span className="text-purple-500 text-2xl font-bold">.</span>
-      </NavbarBrand>
+      </Link>
 
-      <form>
+      {/* Search */}
+      {/* Search */}
+      <form
+        onSubmit={handleSubmit}
+        className="flex-1 min-w-0 mx-2 sm:mx-3 md:max-w-48 lg:max-w-64 xl:max-w-96"
+      >
         <TextInput
           type="text"
           placeholder="Search..."
           rightIcon={AiOutlineSearch}
-          className="hidden lg:inline"
+          className="w-full"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </form>
-      <Button className="w-12 h-10 lg:hidden" color="gray" pill>
-        <AiOutlineSearch />
-      </Button>
-      <div className="flex gap-2 md:order-2">
-        <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
+
+      {/* Right Section */}
+      <div className="flex shrink-0 items-center gap-2 md:order-2">
+        {/* Dark Mode Button */}
+        <Button
+          className="w-12 h-10 hidden sm:inline"
+          color="gray"
+          pill
+          type="button"
+        >
           <FaMoon />
         </Button>
 
-        <Link to="/sign-in">
-          <Button
-            color="light"
-            className="
-      !rounded-lg
-      !border-2
-      !border-violet-600
-      !bg-white
-      !text-violet-600
-      !font-semibold
-      !shadow-none
-      !transition-all
-      !duration-300
-
-      hover:!border-transparent
-      hover:!bg-gradient-to-r
-      hover:!from-violet-600
-      hover:!to-blue-600
-      hover:!text-white
-      hover:!shadow-lg
-    "
+        {/* User Authentication */}
+        {currentUser ? (
+          <Dropdown
+            arrowIcon={false}
+            inline
+            label={
+              <Avatar
+                alt="User profile"
+                img={currentUser.profilePicture}
+                rounded
+              />
+            }
           >
-            Sign In
-          </Button>
-        </Link>
+            <DropdownHeader>
+              <span className="block text-sm">@{currentUser.username}</span>
+
+              <span className="block text-sm font-medium truncate">
+                {currentUser.email}
+              </span>
+            </DropdownHeader>
+
+            <DropdownItem onClick={() => navigate("/dashboard?tab=profile")}>
+              Profile
+            </DropdownItem>
+
+            <DropdownDivider />
+
+            <DropdownItem>Sign out</DropdownItem>
+          </Dropdown>
+        ) : (
+          <Link to="/sign-in">
+            <Button className="bg-gradient-to-r from-purple-500 to-blue-500 !text-white hover:from-purple-600 hover:to-blue-600">
+              Sign In
+            </Button>
+          </Link>
+        )}
 
         <NavbarToggle />
       </div>
+
+      {/* Navigation Links */}
+      {/* Navigation Links */}
       <NavbarCollapse>
-        <NavbarLink as={Link} to="/" active={path === "/"}>
-          Home
+        <NavbarLink active={path === "/"} as="div">
+          <Link to="/">Home</Link>
         </NavbarLink>
 
-        <NavbarLink as={Link} to="/about" active={path === "/about"}>
-          About
+        <NavbarLink active={path === "/about"} as="div">
+          <Link to="/about">About</Link>
         </NavbarLink>
 
-        <NavbarLink as={Link} to="/projects" active={path === "/projects"}>
-          Projects
+        <NavbarLink active={path === "/projects"} as="div">
+          <Link to="/projects">Projects</Link>
         </NavbarLink>
       </NavbarCollapse>
     </Navbar>
