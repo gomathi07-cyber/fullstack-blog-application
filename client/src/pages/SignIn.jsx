@@ -1,29 +1,33 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     password: "",
   });
 
-  const [errorMessage, setErrorMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { loading, error: errorMessage } = useSelector(
+    (state) => state.user
+  );
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // Handle input changes
   const handleChange = (e) => {
-    const { id, value } = e.target;
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: value.trim(),
-    }));
-
-    setErrorMessage("");
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value.trim(),
+    });
   };
 
   // Handle form submission
@@ -31,13 +35,11 @@ export default function SignIn() {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
-      setErrorMessage("Please fill out all fields.");
-      return;
+      return dispatch(signInFailure("Please fill out all fields."));
     }
 
     try {
-      setLoading(true);
-      setErrorMessage("");
+      dispatch(signInStart());
 
       const res = await fetch("/api/auth/signin", {
         method: "POST",
@@ -50,23 +52,23 @@ export default function SignIn() {
       const data = await res.json();
 
       if (!res.ok || data.success === false) {
-        setErrorMessage(data.message || "Signin failed. Please try again.");
-        return;
+        return dispatch(
+          signInFailure(data.message || "Sign in failed")
+        );
       }
 
+      dispatch(signInSuccess(data.user));
       navigate("/");
+
     } catch (error) {
-      setErrorMessage(
-        error.message || "Something went wrong. Please try again.",
-      );
-    } finally {
-      setLoading(false);
+      dispatch(signInFailure(error.message));
     }
   };
 
   return (
     <div className="min-h-screen mt-20">
       <div className="flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-5">
+
         {/* Left section */}
         <div className="flex-1">
           <Link to="/" className="font-bold dark:text-white text-4xl">
@@ -83,7 +85,6 @@ export default function SignIn() {
         {/* Right section */}
         <div className="flex-1">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-
 
             <div>
               <Label htmlFor="email">Your email</Label>
@@ -114,13 +115,14 @@ export default function SignIn() {
             >
               {loading ? (
                 <>
-                  <Spinner size="sm" aria-label="Loading" />
+                  <Spinner size="sm" />
                   <span className="pl-3">Loading...</span>
                 </>
               ) : (
                 "Sign In"
               )}
             </Button>
+
           </form>
 
           <div className="flex gap-2 text-sm mt-5">
@@ -135,6 +137,7 @@ export default function SignIn() {
               {errorMessage}
             </Alert>
           )}
+
         </div>
       </div>
     </div>
