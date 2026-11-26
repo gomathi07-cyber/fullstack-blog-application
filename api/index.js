@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dns from "node:dns";
 import dotenv from "dotenv";
-
+import cookieParser from "cookie-parser";
 import userRoute from "./routes/user.route.js";
 import authRoute from "./routes/auth.route.js";
 
@@ -16,7 +16,11 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-
+app.use(cookieParser());
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 // API routes
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
