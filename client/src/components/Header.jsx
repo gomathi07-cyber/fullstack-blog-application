@@ -67,15 +67,7 @@ export default function Header() {
 
       {/* Right Section */}
       <div className="flex shrink-0 items-center gap-2 md:order-2">
-        {/* Dark Mode Button */}
-        <Button
-          className="w-12 h-10 hidden sm:inline"
-          color="gray"
-          pill
-          type="button"
-        >
-          <FaMoon />
-        </Button>
+
 
         {/* User Authentication */}
         {currentUser ? (
