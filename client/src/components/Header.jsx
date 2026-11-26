@@ -107,7 +107,7 @@ export default function Header() {
             <DropdownItem>Sign out</DropdownItem>
           </Dropdown>
         ) : (
-          <Link to="/sign-in">
+          <Link to="/signin">
             <Button className="bg-gradient-to-r from-purple-500 to-blue-500 !text-white hover:from-purple-600 hover:to-blue-600">
               Sign In
             </Button>
