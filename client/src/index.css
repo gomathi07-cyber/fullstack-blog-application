@@ -4,4 +4,37 @@
 
 .ql-editor {
   font-size: 1.05rem;
+  color: white;
+}
+.ql-editor.ql-blank::before {
+  color: white !important;
+}
+/* Toolbar icons color */
+.ql-snow .ql-stroke {
+  stroke: white !important;
+}
+
+/* Toolbar filled icons */
+.ql-snow .ql-fill {
+  fill: white !important;
+}
+
+/* Toolbar dropdown text */
+.ql-snow .ql-picker {
+  color: white !important;
+}
+
+/* Dropdown arrow */
+.ql-snow .ql-picker-label::before {
+  color: white !important;
+}
+
+/* Toolbar hover */
+.ql-snow .ql-picker-label:hover,
+.ql-snow button:hover {
+  color: #06b6d4 !important;
+}
+
+.ql-snow button:hover .ql-stroke {
+  stroke: #06b6d4 !important;
 }
