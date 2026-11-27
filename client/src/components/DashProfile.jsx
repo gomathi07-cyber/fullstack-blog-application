@@ -29,6 +29,7 @@ import {
   deleteUserStart,
   deleteUserSuccess,
   deleteUserFailure,
+  signoutSuccess,
 } from "../redux/user/userSlice";
 
 import { HiOutlineExclamationCircle } from "react-icons/hi";
@@ -229,6 +230,23 @@ export default function DashProfile() {
     );
   }
 
+  //signout user
+  const handleSignout = async () => {
+    try {
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signoutSuccess());
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
       <h1 className="my-7 text-center font-semibold text-3xl">Profile</h1>
@@ -328,6 +346,7 @@ export default function DashProfile() {
         <button
           type="button"
           className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition-colors duration-300"
+          onClick={handleSignout}
         >
           Sign Out
         </button>
@@ -386,7 +405,13 @@ export default function DashProfile() {
             {/* Action Buttons */}
             <div className="flex justify-center gap-4 border-none outline-none">
               {/* Delete Button */}
-              <Button color="red" className="!border-0 !ring-0 focus:!ring-0 focus:!outline-none"  onClick={handleDeleteUser}>Yes, I'm sure</Button>
+              <Button
+                color="red"
+                className="!border-0 !ring-0 focus:!ring-0 focus:!outline-none"
+                onClick={handleDeleteUser}
+              >
+                Yes, I'm sure
+              </Button>
 
               {/* Cancel Button */}
               <Button

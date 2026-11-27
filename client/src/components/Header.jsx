@@ -16,11 +16,12 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
-import { useSelector } from "react-redux";
-
+import { useSelector , useDispatch } from "react-redux";
+import { signoutSuccess } from "../redux/user/userSlice";
 export default function Header() {
   const path = useLocation().pathname;
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { currentUser } = useSelector((state) => state.user);
 
@@ -34,6 +35,22 @@ export default function Header() {
 
     if (trimmedSearch) {
       navigate(`/search?searchTerm=${encodeURIComponent(trimmedSearch)}`);
+    }
+  };
+
+  const handleSignout = async () => {
+    try {
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signoutSuccess());
+      }
+    } catch (error) {
+      console.log(error.message);
     }
   };
 
@@ -67,8 +84,6 @@ export default function Header() {
 
       {/* Right Section */}
       <div className="flex shrink-0 items-center gap-2 md:order-2">
-
-
         {/* User Authentication */}
         {currentUser ? (
           <Dropdown
@@ -96,11 +111,13 @@ export default function Header() {
 
             <DropdownDivider />
 
-            <DropdownItem>Sign out</DropdownItem>
+            <DropdownItem onClick={handleSignout}>
+              Sign out
+            </DropdownItem>
           </Dropdown>
         ) : (
           <Link to="/signin">
-            <Button className="bg-gradient-to-r from-purple-500 to-blue-500 !text-white hover:from-purple-600 hover:to-blue-600">
+            <Button  className="bg-gradient-to-r from-purple-500 to-blue-500 !text-white hover:from-purple-600 hover:to-blue-600">
               Sign In
             </Button>
           </Link>
