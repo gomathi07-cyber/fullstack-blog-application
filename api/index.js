@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import userRoute from "./routes/user.route.js";
 import authRoute from "./routes/auth.route.js";
-
+import postRoutes from './routes/post.route.js';
 dotenv.config();
 
 // Configure DNS
@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 // API routes
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
-
+app.use('/api/post', postRoutes);
 // Error handling
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
