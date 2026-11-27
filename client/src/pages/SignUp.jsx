@@ -55,7 +55,7 @@ export default function SignUp() {
         return;
       }
 
-      navigate("/sign-in");
+      navigate("/signin");
     } catch (error) {
       setErrorMessage(
         error.message || "Something went wrong. Please try again.",
