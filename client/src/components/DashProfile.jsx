@@ -6,7 +6,7 @@ import {
   ModalBody,
   ModalHeader,
 } from "flowbite-react";
-
+import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -331,6 +331,16 @@ export default function DashProfile() {
         >
           Update
         </Button>
+        {currentUser?.isAdmin && (
+          <Link to="/create-post" className="block w-full">
+            <Button
+              type="button"
+              className="w-full !bg-gradient-to-r !from-purple-500 !to-pink-500 !text-white hover:!from-pink-500 hover:!to-purple-600 transition-all duration-300"
+            >
+              Create a post
+            </Button>
+          </Link>
+        )}
       </form>
 
       {/* Account actions */}
