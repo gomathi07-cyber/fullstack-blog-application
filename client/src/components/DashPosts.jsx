@@ -18,7 +18,9 @@ export default function DashPosts() {
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
+  const [showMore, setShowMore] = useState(true);
 
+  // Fetch initial posts
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -37,8 +39,15 @@ export default function DashPosts() {
         }
 
         setUserPosts(data.posts || []);
+
+        // Hide Show More if fewer than 9 posts are returned
+        if (data.posts.length < 9) {
+          setShowMore(false);
+        } else {
+          setShowMore(true);
+        }
       } catch (error) {
-        console.error(error.message);
+        console.log(error.message);
         setFetchError('Something went wrong while fetching posts.');
       } finally {
         setLoading(false);
@@ -50,21 +59,56 @@ export default function DashPosts() {
     }
   }, [currentUser?._id, currentUser?.isAdmin]);
 
+  // Fetch additional posts
+  const handleShowMore = async () => {
+    const startIndex = userPosts.length;
+
+    try {
+      setLoading(true);
+      setFetchError(null);
+
+      const res = await fetch(
+        `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFetchError(data.message || 'Failed to fetch more posts');
+        return;
+      }
+
+      setUserPosts((prev) => [...prev, ...(data.posts || [])]);
+
+      if (data.posts.length < 9) {
+        setShowMore(false);
+      }
+    } catch (error) {
+      console.log(error.message);
+      setFetchError('Something went wrong while loading more posts.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-3 w-full overflow-x-auto">
 
+      {/* Loading */}
       {loading && (
         <p className="text-center text-gray-500 my-5">
           Loading posts...
         </p>
       )}
 
+      {/* Error */}
       {fetchError && (
         <p className="text-center text-red-500 my-5">
           {fetchError}
         </p>
       )}
 
+      {/* Posts table */}
       {!loading &&
         !fetchError &&
         currentUser?.isAdmin &&
@@ -131,15 +175,28 @@ export default function DashPosts() {
                         Edit
                       </Link>
                     </TableCell>
-
                   </TableRow>
                 ))}
               </TableBody>
 
             </Table>
+
+            {/* Show more button */}
+            {showMore && (
+              <button
+                type="button"
+                onClick={handleShowMore}
+                disabled={loading}
+                className="w-full text-teal-500 self-center text-sm py-7 hover:underline disabled:opacity-50"
+              >
+                {loading ? 'Loading...' : 'Show more'}
+              </button>
+            )}
+
           </div>
         )}
 
+      {/* No posts */}
       {!loading &&
         !fetchError &&
         (!currentUser?.isAdmin || userPosts.length === 0) && (
