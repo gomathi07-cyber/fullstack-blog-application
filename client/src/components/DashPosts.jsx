@@ -1,24 +1,34 @@
-
 import {
+  Modal,
+  ModalBody,
+  ModalHeader,
+  Button,
   Table,
   TableHead,
   TableHeadCell,
   TableBody,
   TableRow,
   TableCell,
-} from 'flowbite-react';
+} from "flowbite-react";
 
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function DashPosts() {
   const { currentUser } = useSelector((state) => state.user);
 
   const [userPosts, setUserPosts] = useState([]);
+  const [showMore, setShowMore] = useState(true);
+
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
-  const [showMore, setShowMore] = useState(true);
+
+  // Delete modal states
+  const [showModal, setShowModal] = useState(false);
+  const [postIdToDelete, setPostIdToDelete] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Fetch initial posts
   useEffect(() => {
@@ -27,20 +37,17 @@ export default function DashPosts() {
         setLoading(true);
         setFetchError(null);
 
-        const res = await fetch(
-          `/api/post/getposts?userId=${currentUser._id}`
-        );
+        const res = await fetch(`/api/post/getposts?userId=${currentUser._id}`);
 
         const data = await res.json();
 
         if (!res.ok) {
-          setFetchError(data.message || 'Failed to fetch posts');
+          setFetchError(data.message || "Failed to fetch posts");
           return;
         }
 
         setUserPosts(data.posts || []);
 
-        // Hide Show More if fewer than 9 posts are returned
         if (data.posts.length < 9) {
           setShowMore(false);
         } else {
@@ -48,7 +55,7 @@ export default function DashPosts() {
         }
       } catch (error) {
         console.log(error.message);
-        setFetchError('Something went wrong while fetching posts.');
+        setFetchError("Something went wrong while fetching posts.");
       } finally {
         setLoading(false);
       }
@@ -59,7 +66,7 @@ export default function DashPosts() {
     }
   }, [currentUser?._id, currentUser?.isAdmin]);
 
-  // Fetch additional posts
+  // Fetch more posts
   const handleShowMore = async () => {
     const startIndex = userPosts.length;
 
@@ -68,13 +75,13 @@ export default function DashPosts() {
       setFetchError(null);
 
       const res = await fetch(
-        `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`
+        `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`,
       );
 
       const data = await res.json();
 
       if (!res.ok) {
-        setFetchError(data.message || 'Failed to fetch more posts');
+        setFetchError(data.message || "Failed to fetch more posts");
         return;
       }
 
@@ -85,27 +92,62 @@ export default function DashPosts() {
       }
     } catch (error) {
       console.log(error.message);
-      setFetchError('Something went wrong while loading more posts.');
+      setFetchError("Something went wrong while loading more posts.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Delete post
+  const handleDeletePost = async () => {
+    if (!postIdToDelete) return;
+
+    try {
+      setDeleteLoading(true);
+
+      const res = await fetch(
+        `/api/post/deletepost/${postIdToDelete}/${currentUser._id}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFetchError(
+          typeof data === "string"
+            ? data
+            : data.message || "Failed to delete post",
+        );
+        return;
+      }
+
+      // Remove deleted post from the frontend
+      setUserPosts((prev) =>
+        prev.filter((post) => post._id !== postIdToDelete),
+      );
+
+      setShowModal(false);
+      setPostIdToDelete("");
+    } catch (error) {
+      console.log(error.message);
+      setFetchError("Something went wrong while deleting the post.");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <div className="p-3 w-full overflow-x-auto">
-
       {/* Loading */}
       {loading && (
-        <p className="text-center text-gray-500 my-5">
-          Loading posts...
-        </p>
+        <p className="text-center text-gray-500 my-5">Loading posts...</p>
       )}
 
       {/* Error */}
       {fetchError && (
-        <p className="text-center text-red-500 my-5">
-          {fetchError}
-        </p>
+        <p className="text-center text-red-500 my-5">{fetchError}</p>
       )}
 
       {/* Posts table */}
@@ -114,9 +156,7 @@ export default function DashPosts() {
         currentUser?.isAdmin &&
         userPosts.length > 0 && (
           <div className="overflow-x-auto rounded-lg shadow-md">
-
             <Table hoverable>
-
               <TableHead>
                 <TableRow>
                   <TableHeadCell>Date updated</TableHeadCell>
@@ -157,16 +197,23 @@ export default function DashPosts() {
                       </Link>
                     </TableCell>
 
-                    <TableCell>
-                      {post.category}
-                    </TableCell>
+                    <TableCell>{post.category}</TableCell>
 
+                    {/* Delete button */}
                     <TableCell>
-                      <span className="font-medium text-red-500 hover:underline cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(true);
+                          setPostIdToDelete(post._id);
+                        }}
+                        className="font-medium text-red-500 hover:underline"
+                      >
                         Delete
-                      </span>
+                      </button>
                     </TableCell>
 
+                    {/* Edit */}
                     <TableCell>
                       <Link
                         className="font-medium text-teal-500 hover:underline"
@@ -178,21 +225,19 @@ export default function DashPosts() {
                   </TableRow>
                 ))}
               </TableBody>
-
             </Table>
 
-            {/* Show more button */}
+            {/* Show more */}
             {showMore && (
               <button
                 type="button"
                 onClick={handleShowMore}
                 disabled={loading}
-                className="w-full text-teal-500 self-center text-sm py-7 hover:underline disabled:opacity-50"
+                className="w-full text-teal-500 text-sm py-7 hover:underline disabled:opacity-50"
               >
-                {loading ? 'Loading...' : 'Show more'}
+                Show more
               </button>
             )}
-
           </div>
         )}
 
@@ -204,6 +249,56 @@ export default function DashPosts() {
             You have no posts yet!
           </p>
         )}
+
+      {/* Delete confirmation modal */}
+      <Modal
+        show={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setPostIdToDelete("");
+        }}
+        popup
+        size="md"
+        theme={{
+          content: {
+            base: "relative h-full w-full p-4 md:h-auto",
+            inner: "relative rounded-lg bg-white shadow",
+          },
+        }}
+      >
+        <ModalHeader className="border-b-0 bg-white" />
+
+        <ModalBody className="bg-white rounded-b-lg">
+          <div className="text-center">
+            <HiOutlineExclamationCircle className="h-14 w-14 text-red-500 mb-4 mx-auto" />
+
+            <h3 className="mb-5 text-lg font-medium text-gray-700">
+              Are you sure you want to delete this post?
+            </h3>
+
+            <div className="flex justify-center gap-4">
+              <Button
+                color="red"
+                onClick={handleDeletePost}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? "Deleting..." : "Yes, I'm sure"}
+              </Button>
+
+              <Button
+                color="light"
+                onClick={() => {
+                  setShowModal(false);
+                  setPostIdToDelete("");
+                }}
+                disabled={deleteLoading}
+              >
+                No, cancel
+              </Button>
+            </div>
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 }
